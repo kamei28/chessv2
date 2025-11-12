@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chess App♟</title>
+    <link rel="stylesheet" href="chess.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="text/javascript" src="./funcs.js" defer></script>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Chess with Rust</h1>
+
+      <!-- functions -->
+      <ul class="funcs">
+        <li class="nextturn">Next turn: <span id="wb">白</span></li>
+        <li class="detail">詳細</li>
+      </ul>
+
+      <!-- change pawn-->
+      <!-- <ul class="changepawn">
+        <img src="./pieces/br.png" id="br" width="50">
+        <img src="./pieces/bn.png" id="bn" width="50">
+        <img src="./pieces/bb.png" id="bb" width="50">
+        <img src="./pieces/bq.png" id="bq" width="50">
+      </ul> -->
+
+       <!--create a board -->
+      <div class="row">
+        <table id="board">
+          <tr>
+
+            <!-- black rook -->
+            <th class="white">
+              <div id="63"><img src="./pieces/br.png" id="br1" width="50"></div>
+              <span class="vision">a8</span>
+            </th>
+            
+            <!-- black knight-->
+            <th class="black">
+              <div id="62"><img src="./pieces/bn.png" id="bn1" width="50"></div>
+              <span class="vision">b8</span>
+            </th>
+            
+            <!-- black bishop -->
+            <th class="white">
+              <div id="61"><img src="./pieces/bb.png" id="bb1" width="50"></div>
+              <span class="vision">c8</span>
+            </th>
+            
+            <!-- black queen -->
+            <th class="black">
+              <div id="60"><img src="./pieces/bq.png" id="bq1" width="50"></div>
+              <span class="vision">d8</span>
+            </th>
+            
+            <!-- black king -->
+            <th class="white">
+              <div id="59"><img src="./pieces/bk.png" id="bk1" width="50"></div>
+              <span class="vision">e8</span>
+            </th>
+            
+            <!-- black bishop -->
+            <th class="black">
+              <div id="58"><img src="./pieces/bb.png" id="bb2" width="50"></div>
+              <span class="vision">f8</span>
+            </th>
+            
+            <!-- black knight -->
+            <th class="white">
+              <div id="57"><img src="./pieces/bn.png" id="bn2" width="50"></div>
+              <span class="vision">g8</span>
+            </th>
+            
+            <!-- black rook -->
+            <th class="black">
+              <div id="56"><img src="./pieces/br.png" id="br2" width="50"></div>
+              <span class="vision">h8</span>
+            </th>
+          
+          </tr>
+          <tr>
+
+            <!-- black pawn -->
+            <th class="black">
+              <div id="55"><img src="./pieces/bp.png" id="bp1" width="50"></div>
+              <span class="vision">a7</span>
+            </th>
+
+            <!-- black pawn -->
+            <th class="white">
+              <div id="54"><img src="./pieces/bp.png" id="bp2" width="50"></div>
+              <span class="vision">b7</span>
+            </th>
+
+            <!-- black pawn -->
+            <th class="black">
+              <div id="53"><img src="./pieces/bp.png" id="bp3" width="50"></div>
+              <span class="vision">c7</span>
+            </th>
+
+            <!-- black pawn -->
+            <th class="white">
+              <div id="52"><img src="./pieces/bp.png" id="bp4" width="50"></div>
+              <span class="vision">d7</span>
+            </th>
+
+            <!-- black pawn -->
+            <th class="black">
+              <div id="51"><img src="./pieces/bp.png" id="bp5" width="50"></div>
+              <span class="vision">e7</span>
+            </th>
+
+            <!-- black pawn -->
+            <th class="white">
+              <div id="50"><img src="./pieces/bp.png" id="bp6" width="50"></div>
+              <span class="vision">f7</span>
+            </th>
+
+            <!-- black pawn -->
+            <th class="black">
+              <div id="49"><img src="./pieces/bp.png" id="bp7" width="50"></div>
+              <span class="vision">g7</span>
+            </th>
+
+            <!-- black pawn -->
+            <th class="white">
+              <div id="48"><img src="./pieces/bp.png" id="bp8" width="50"></div>
+              <span class="vision">h7</span>
+            </th>
+
+          </tr>
+          <tr>
+
+            <th class="white">
+              <div id="47"></div>
+              <span class="vision">a6</span>
+            </th>
+
+            <th class="black">
+              <div id="46"></div>
+              <span class="vision">b6</span>
+            </th>
+
+            <th class="white">
+              <div id="45"></div>
+              <span class="vision">c6</span>
+            </th>
+
+            <th class="black">
+              <div id="44"></div>
+              <span class="vision">d6</span>
+            </th>
+
+            <th class="white">
+              <div id="43"></div>
+              <span class="vision">e6</span>
+            </th>
+
+            <th class="black">
+              <div id="42"></div>
+              <span class="vision">f6</span>
+            </th>
+
+            <th class="white">
+              <div id="41"></div>
+              <span class="vision">g6</span>
+            </th>
+
+            <th class="black">
+              <div id="40"></div>
+              <span class="vision">h6</span>
+            </th>
+
+          </tr>
+          <tr>
+
+            <th class="black">
+              <div id="39"></div>
+              <span class="vision">a5</span>
+            </th>
+
+            <th class="white">
+              <div id="38"></div>
+              <span class="vision">b5</span>
+            </th>
+
+            <th class="black">
+              <div id="37"></div>
+              <span class="vision">c5</span>
+            </th>
+
+            <th class="white">
+              <div id="36"></div>
+              <span class="vision">d5</span>
+            </th>
+
+            <th class="black">
+              <div id="35"></div>
+              <span class="vision">e5</span>
+            </th>
+
+            <th class="white">
+              <div id="34"></div>
+              <span class="vision">f5</span>
+            </th>
+
+            <th class="black">
+              <div id="33"></div>
+              <span class="vision">g5</span>
+            </th>
+
+            <th class="white">
+              <div id="32"></div>
+              <span class="vision">h5</span>
+            </th>
+
+          </tr>
+          <tr>
+
+            <th class="white">
+              <div id="31"></div>
+              <span class="vision">a4</span>
+            </th>
+
+            <th class="black">
+              <div id="30"></div>
+              <span class="vision">b4</span>
+            </th>
+
+            <th class="white">
+              <div id="29"></div>
+              <span class="vision">c4</span>
+            </th>
+
+            <th class="black">
+              <div id="28"></div>
+              <span class="vision">d4</span>
+            </th>
+
+            <th class="white">
+              <div id="27"></div>
+              <span class="vision">e4</span>
+            </th>
+
+            <th class="black">
+              <div id="26"></div>
+              <span class="vision">f4</span>
+            </th>
+
+            <th class="white">
+              <div id="25"></div>
+              <span class="vision">g4</span>
+            </th>
+
+            <th class="black">
+              <div id="24"></div>
+              <span class="vision">h4</span>
+            </th>
+
+          </tr>
+          <tr>
+
+            <th class="black">
+              <div id="23"></div>
+              <span class="vision">a3</span>
+            </th>
+
+            <th class="white">
+              <div id="22"></div>
+              <span class="vision">b3</span>
+            </th>
+
+            <th class="black">
+              <div id="21"></div>
+              <span class="vision">c3</span>
+            </th>
+
+            <th class="white">
+              <div id="20"></div>
+              <span class="vision">d3</span>
+            </th>
+
+            <th class="black">
+              <div id="19"></div>
+              <span class="vision">e3</span>
+            </th>
+
+            <th class="white">
+              <div id="18"></div>
+              <span class="vision">f3</span>
+            </th>
+
+            <th class="black">
+              <div id="17"></div>
+              <span class="vision">g3</span>
+            </th>
+
+            <th class="white">
+              <div id="16"></div>
+              <span class="vision">h3</span>
+            </th>
+
+          </tr>
+          <tr>
+
+            <!-- white pawn -->
+            <th class="white">
+              <div id="15"><img src="./pieces/wp.png" id="wp1" width="50"></div>
+              <span class="vision">a2</span>
+            </th>
+
+            <!-- white pawn -->
+            <th class="black">
+              <div id="14"><img src="./pieces/wp.png" id="wp2" width="50"></div>
+              <span class="vision">b2</span>
+            </th>
+
+            <!-- white pawn -->
+            <th class="white">
+              <div id="13"><img src="./pieces/wp.png" id="wp3" width="50"></div>
+              <span class="vision">c2</span>
+            </th>
+
+            <!-- white pawn -->
+            <th class="black">
+              <div id="12"><img src="./pieces/wp.png" id="wp4" width="50"></div>
+              <span class="vision">d2</span>
+            </th>
+
+            <!-- white pawn -->
+            <th class="white">
+              <div id="11"><img src="./pieces/wp.png" id="wp5" width="50"></div>
+              <span class="vision">e2</span>
+            </th>
+
+            <!-- white pawn -->
+            <th class="black">
+              <div id="10"><img src="./pieces/wp.png" id="wp6" width="50"></div>
+              <span class="vision">f2</span>
+            </th>
+
+            <!-- white pawn -->
+            <th class="white">
+              <div id="9"><img src="./pieces/wp.png" id="wp7" width="50"></div>
+              <span class="vision">g2</span>
+            </th>
+
+            <!-- white pawn -->
+            <th class="black">
+              <div id="8"><img src="./pieces/wp.png" id="wp8" width="50"></div>
+              <span class="vision">h2</span>
+            </th>
+
+          </tr>
+          <tr>
+
+            <!-- white rook -->
+            <th class="black">
+              <div id="7"><img src="./pieces/wr.png" id="wr1" width="50"></div>
+              <span class="vision">a1</span>
+            </th>
+
+            <!-- white knight -->
+            <th class="white">
+              <div id="6"><img src="./pieces/wn.png" id="wn1" width="50"></div>
+              <span class="vision">b1</span>
+            </th>
+
+            <!-- white bishop -->
+            <th class="black">
+              <div id="5"><img src="./pieces/wb.png" id="wb1" width="50"></div>
+              <span class="vision">c1</span>
+            </th>
+
+            <!-- white queen -->
+            <th class="white">
+              <div id="4"><img src="./pieces/wq.png" id="wq1" width="50"></div>
+              <span class="vision">d1</span>
+            </th>
+
+            <!-- white king -->
+            <th class="black">
+              <div id="3"><img src="./pieces/wk.png" id="wk1" width="50"></div>
+              <span class="vision">e1</span>
+            </th>
+
+            <!-- white bishop -->
+            <th class="white">
+              <div id="2"><img src="./pieces/wb.png" id="wb2" width="50"></div>
+              <span class="vision">f1</span>
+            </th>
+
+            <!-- white knight -->
+            <th class="black">
+              <div id="1"><img src="./pieces/wn.png" id="wn2" width="50"></div>
+              <span class="vision">g1</span>
+            </th>
+
+            <!-- white rook -->
+            <th class="white">
+              <div id="0"><img src="./pieces/wr.png" id="wr2" width="50"></div>
+              <span class="vision">h1</span>
+            </th>
+
+          </tr>
+          <tr>
+        </table>
+      </div>
+
+      <!-- 
+      <form class="row" id="greet-form">
+        <input id="greet-input" placeholder="Enter a name..." />
+        <button type="submit">Greet</button>
+      </form>
+      <p id="greet-msg"></p>
+      -->
+    </main>
+  </body>
+</html>

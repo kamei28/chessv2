@@ -1,0 +1,107 @@
+.funcs {
+    display: flex;
+    list-style-type: none;
+    width: fit-content;
+    margin: 0;
+    padding: 2px;
+    color: white;
+    font-size: 0.9em;
+    background: #0d0015;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+.funcs li {
+    margin: 0 5px;
+    padding: 5px;
+}
+#board {
+    height: 560px;
+    width: 560px;
+    padding: 0;
+    border-collapse: collapse; /* セルの隙間をなくす */
+    border-spacing: 0;
+    outline: 5px solid #708090;
+}
+#board, tr, th, div {
+    margin: 0;
+    padding: 0;
+}
+#board th {
+  width: calc(100% / 8);
+  height: calc(100% / 8);
+  position: relative;
+}
+#board div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+.selected {
+    border: 4px solid rgb(0, 0, 0, 0.2);
+}
+img {
+    width: 90%;
+    padding: 5%;
+    cursor: grab;
+}
+img:active {
+    cursor: grabbing;
+}
+.vision {
+    line-height: 1;
+    width: fit-content;
+    padding: 2px;
+    font-size: x-small;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+.white {
+    background: #e7e7eb;
+}
+.white .vision {
+    color: #95949a;
+}
+.black {
+    background: #708090;
+}
+.black .vision {
+    color: #e7e7eb;
+}
+.valid, .vaild2 {
+    height: 24%;
+    width: 24%;
+    background: rgb(0, 0, 64, 0.3);
+    pointer-events: none;
+    border-radius: 50%;
+    position: absolute;
+    top: calc(50% - 12%);
+    left: calc(50% - 12%);
+}
+.vaild2 {
+    background: rgb(64, 0, 0, 0.3);
+}
+
+@media screen and (min-width: 1250px) {
+    .funcs {
+        right: 15%;
+    }
+}
+
+@media screen and (max-height: 700px) {
+    #board {
+        height: max(512px, calc(80vh - 25px));
+        width: max(512px, calc(80vh - 25px));
+    }
+}
+
+@media screen and (max-width: 560px) {
+    #board {
+        height: 95vw;
+        width: 95vw;
+    }
+}
