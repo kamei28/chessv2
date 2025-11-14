@@ -8,7 +8,6 @@ const RANK_SHIFT    : u8 =  8;
 const RANK_NUMBER   : u8 =  8;
 const RANK_UP       : i8 =  8;
 const RANK_DOWN     : i8 = -8;
-
 const FILE_SHIFT    : u8 =  1;
 
 /** メモ
@@ -26,16 +25,13 @@ impl GameState {
 
         // 駒別移動処理: ポーン
         if self.pawn & from_mask != 0 {
-
             if (EnPassant {     // 移動先のアンパッサン判定
                 place: ((to as i8) + if self.move_count & 0b1 == 0 { RANK_UP } else { RANK_DOWN }) as u8, 
                 valid_turn: self.move_count
             }) == self.en_passant {
-
-                // アンパッサンコマドリ
-                self.white &= !(1u64 << to << RANK_SHIFT);
+                self.white &= !(1u64 << to << RANK_SHIFT);  // アンパッサンコマドリ
                 self.black &= !(1u64 << to >> RANK_SHIFT);
-            
+
             } else if from.abs_diff(to) == 2*RANK_SHIFT {     // 2マス飛びならアンパッサン登録
                 self.en_passant = EnPassant { place: from, valid_turn: self.move_count + 1 };
             }
@@ -89,8 +85,7 @@ impl GameState {
             self.black |= to_mask;
             self.white &= !to_mask;
         }
-
-        // 駒の移動処理
+        
         *board &= !from_mask;
         *board |= to_mask;
 
@@ -138,50 +133,6 @@ impl GameState {
 
         ret_loc(ret & mask)
     }
-    // fn generate_pawn_moves(&self, mut loc: u8) -> Vec<u8> {
-    //     let cmp_color = self.white & (1 << loc) != 0;
-    //     let board = self.white | self.black;
-    //     let mut skip_mask: u64= 0;
-    //     let basic_mask = if loc%8 == 0 { 0b110 }    // adjustment for the a and h files
-    //         else if loc%8 == 7 { 0b011 }
-    //         else { 0b111 };
-
-    //     // skip_mask: 2マス、mask: 基本マス
-    //     let (ret, mask) = if cmp_color {
-    //         let bit_mask = 1 << (loc+8);    // white
-    //         let mut ret_mask = 0b010;
-            
-    //         if loc/8 == 1 && board & bit_mask == 0 {
-    //             skip_mask = 0x1000000 << loc%8;
-    //             ret_mask = 0x202;   // 0x200 + 0b010
-    //         }
-    //         loc += 7;   // white, up 1 line -3bit//2
-    //         (self.black ^ ret_mask << loc, basic_mask << loc)
-
-    //     } else {
-    //         let bit_mask = 1 << (loc-8);    // black
-    //         if loc/8 == 6 && board & bit_mask == 0 {
-    //             skip_mask = 0x100000000 << loc%8;
-    //             (self.white ^ 0x202 << (loc - 17), 0b111 << (loc - 9))
-
-    //         } else {
-    //             if loc != 8 {
-    //                 loc -= 9;   // black, down 1 line -3bit//2
-    //                 (self.white ^ 0b010 << loc, basic_mask << loc)
-    //             } else {
-    //                 loc -= 8;   // black, down 1 line -3bit//2
-    //                 (self.white ^ 0b01 << loc, 0b11 << loc)
-    //             }
-    //         }
-    //     };
-
-    //     // println!("{ret:064b}\n{:064b}", mask | skip_mask);
-
-    //     // アンパッサン追加(retを1にする)
-    //     // 2マス追加時にアンパッサン用変数用意
-
-    //     ret_loc(ret & (mask | skip_mask))
-    // }
 
     //knight
     fn generate_knight_moves(&self, loc: u8) -> Vec<u8> {
@@ -278,8 +229,7 @@ pub fn mvoe_piece(from: u8, to: u8, state: State<Arc<Mutex<GameState>>>) -> u8 {
     maps.mvoe_piece(from, to);
 
     // 削除する駒の位置を返す
-    // 8(/8): RANK NUMBER
-    if maps.pawn & (1u64 << to) != 0 && maps.en_passant.place.abs_diff(to) == 8 && maps.en_passant.valid_turn == (maps.move_count - 1) {
+    if maps.pawn & (1u64 << to) != 0 && maps.en_passant.place.abs_diff(to) == RANK_NUMBER && maps.en_passant.valid_turn == (maps.move_count - 1) {
         let rank_shift = if maps.en_passant.valid_turn & 0b1 != 0 { RANK_UP } else { RANK_DOWN };
         ((maps.en_passant.place as i8) + 2*rank_shift).try_into().unwrap()
     } else {
@@ -294,23 +244,6 @@ pub fn test(loc: u8, state: State<Arc<Mutex<GameState>>>) -> Vec<u8> {
     
     maps.generate_pawn_moves(loc)
 }
-
-// /** キング以外の合法手を求める(解析用) */
-// fn get_valid_moves(board: &u64, piece: &u64) -> Vec<u8> {
-//     let mut valid = !board & piece;
-//     let mut ret = Vec::new();
-
-//     while valid != 0 {
-//         ret.push(valid.trailing_zeros() as u8);
-//         valid &= valid - 1;
-//     }
-//     ret
-// }
-
-// /** 駒の可動範囲を求める */
-// fn get_move_range(loc: &u8) {
-
-// }
 
 /** 1の場所を返す */
  fn ret_loc(mut board: u64) -> Vec<u8> {
