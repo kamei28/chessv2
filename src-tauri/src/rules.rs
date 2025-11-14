@@ -15,33 +15,71 @@ impl GameState {
     fn mvoe_piece(&mut self, from: u8, to: u8) {
         let from_mask = 1 << from;
         let to_mask = 1 << to;
-        let board = if self.pawn & from_mask != 0 { // アンパッサンコマドリ
-            if (EnPassant { place: (to as i8 + if self.move_count & 1 == 0 { 8 } else { -8 }) as u8, valid_turn: self.move_count }) == self.en_passant {
+        let mut board: &mut u64 = &mut self.error;
+
+        // 駒別移動処理: ポーン
+        if self.pawn & from_mask != 0 {
+            if (EnPassant {     // アンパッサンコマドリ
+                place: (to as i8 + if self.move_count & 1 == 0 { 8 } else { -8 }) as u8, 
+                valid_turn: self.move_count
+            }) == self.en_passant {
                 self.white &= !(1u64 << to << 8);
                 self.black &= !(1u64 << to >> 8 );
             } else if (from as i8 - to as i8).abs() == 16 {
                 self.en_passant = EnPassant { place: from, valid_turn: self.move_count + 1 };
             }
-            &mut self.pawn
+            board = &mut self.pawn;
+        } else {
+            self.pawn &= !to_mask;
         }
-            else if self.knight & from_mask != 0 { &mut self.knight  }
-            else if self.bishop & from_mask != 0 { &mut self.bishop  }
-            else if self.rook   & from_mask != 0 { &mut self.rook    }
-            else if self.queen  & from_mask != 0 { &mut self.queen   }
-            else if self.king   & from_mask != 0 { &mut self.king    }
-            else { &mut self.error };
 
+        // 駒別移動処理: ナイト
+        if self.knight & from_mask != 0 {
+            board = &mut self.knight;
+        } else {
+            self.knight &= !to_mask;
+        }
+
+        // 駒別移動処理: ビショップ
+        if self.bishop & from_mask != 0 {
+            board = &mut self.bishop;
+        } else {
+            self.bishop &= !to_mask;
+        }
+
+        // 駒別移動処理: ルーク
+        if self.rook   & from_mask != 0 {
+            board = &mut self.rook;
+        } else {
+            self.rook &= !to_mask;
+        }
+
+        // 駒別移動処理: クイーン
+        if self.queen  & from_mask != 0 {
+            board = &mut self.queen;
+        } else {
+            self.queen &= !to_mask;
+        }
+
+        // 駒別移動処理: キング
+        if self.king   & from_mask != 0 {
+            board = &mut self.king;
+        } else {
+            self.king &= !to_mask;
+        }
+
+        // 色別移動処理: ホワイト、ブラック
         if (self.white >> from) & 1 != 0 {
             self.white &= !from_mask;
             self.white |= to_mask;
             self.black &= !to_mask;
-            
         } else {
             self.black &= !from_mask;
             self.black |= to_mask;
             self.white &= !to_mask;
         }
 
+        // 駒の移動処理
         *board &= !from_mask;
         *board |= to_mask;
 
@@ -136,7 +174,21 @@ impl GameState {
 
     //knight
     fn generate_knight_moves(&self, loc: u8) -> Vec<u8> {
-        vec![]
+        // 可動領域
+        let mut mask_b = if loc & 7 < 4 { 0x3f3f3f3f3f3f3f3f } else { 0xfcfcfcfcfcfcfcfc };
+
+        // ベース可動範囲を適応
+        mask_b &= if loc < 18 { 0xa1100110a >> (18 - loc) } else { 0xa1100110a << (loc - 18) };
+
+        // 全体ボード
+        let ret = if self.white & (1 << loc) != 0 {
+            !self.white & (self.black | mask_b)
+        } else {
+            !self.black & (self.white | mask_b)
+        };
+
+        println!("knihgt");
+        ret_loc(ret & mask_b)
     }
 
     // bishop
@@ -224,6 +276,7 @@ pub fn mvoe_piece(from: u8, to: u8, state: State<Arc<Mutex<GameState>>>) -> u8 {
 #[tauri::command]
 pub fn test(loc: u8, state: State<Arc<Mutex<GameState>>>) -> Vec<u8> {
     let maps = state.lock().unwrap();
+    
     maps.generate_pawn_moves(loc)
 }
 
