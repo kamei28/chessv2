@@ -4,6 +4,13 @@ use tauri::State;
 
 use crate::{EnPassant, GameState};
 
+const RANK_SHIFT    : u8 =  8;
+const RANK_NUMBER   : u8 =  8;
+const RANK_UP       : i8 =  8;
+const RANK_DOWN     : i8 = -8;
+
+const FILE_SHIFT    : u8 =  1;
+
 /** メモ
  * マスは0~63
  * シフトは1~
@@ -13,19 +20,23 @@ use crate::{EnPassant, GameState};
 impl GameState {
     /** 駒の移動処理 */
     fn mvoe_piece(&mut self, from: u8, to: u8) {
-        let from_mask = 1 << from;
-        let to_mask = 1 << to;
-        let mut board: &mut u64 = &mut self.error;
+        let from_mask = 1u64 << from;
+        let to_mask = 1u64 << to;
+        let mut board = &mut self.error;
 
         // 駒別移動処理: ポーン
         if self.pawn & from_mask != 0 {
-            if (EnPassant {     // アンパッサンコマドリ
-                place: (to as i8 + if self.move_count & 1 == 0 { 8 } else { -8 }) as u8, 
+
+            if (EnPassant {     // 移動先のアンパッサン判定
+                place: ((to as i8) + if self.move_count & 0b1 == 0 { RANK_UP } else { RANK_DOWN }) as u8, 
                 valid_turn: self.move_count
             }) == self.en_passant {
-                self.white &= !(1u64 << to << 8);
-                self.black &= !(1u64 << to >> 8 );
-            } else if (from as i8 - to as i8).abs() == 16 {
+
+                // アンパッサンコマドリ
+                self.white &= !(1u64 << to << RANK_SHIFT);
+                self.black &= !(1u64 << to >> RANK_SHIFT);
+            
+            } else if from.abs_diff(to) == 2*RANK_SHIFT {     // 2マス飛びならアンパッサン登録
                 self.en_passant = EnPassant { place: from, valid_turn: self.move_count + 1 };
             }
             board = &mut self.pawn;
@@ -69,7 +80,7 @@ impl GameState {
         }
 
         // 色別移動処理: ホワイト、ブラック
-        if (self.white >> from) & 1 != 0 {
+        if (self.white >> from) & 0b1 != 0 {
             self.white &= !from_mask;
             self.white |= to_mask;
             self.black &= !to_mask;
@@ -88,7 +99,7 @@ impl GameState {
 
     /** インデックスから駒の可動範囲を調べる */
     fn get_valid_moves(&self, loc: u8) -> Vec<u8> {
-        let bit_mask = 1 << loc;
+        let bit_mask = 1u64 << loc;
         if self.pawn        & bit_mask != 0 { self.generate_pawn_moves(loc)    } 
         else if self.knight & bit_mask != 0 { self.generate_knight_moves(loc)  } 
         else if self.bishop & bit_mask != 0 { self.generate_bishop_moves(loc)  } 
@@ -100,27 +111,27 @@ impl GameState {
 
     // pawn
     fn generate_pawn_moves(&self, loc: u8) -> Vec<u8> {
-        let mut mask_b = (0b111 << (loc as u64 - 1)) & (0xff << (loc & !7));
+        let mut mask_b = (0b111u64 << (loc - FILE_SHIFT)) & (0xffu64 << (loc & !7));
+        let mut mask_c = 0x101u64 << loc;
         let piece_a = self.white | self.black;
-        let mut mask_c = 0x101 << loc;
 
         // ret: 全体ボードを0x101でXOR後、mask: 0b111 & 0xffでANDして可動範囲を求める
-        let (ret, mask): (u64, u64) = if self.white & 1 << loc != 0 {   // white piece
-            if loc & !7 == 8 && piece_a & (mask_c << 8) == 0 {
-                mask_b |= 1 << loc << 8;
-            } else if self.move_count == self.en_passant.valid_turn && mask_b & (1u64 << self.en_passant.place >> 16) != 0 {
-                mask_c |= 1u64 << self.en_passant.place >> 16;
+        let (ret, mask): (u64, u64) = if self.white & 0b1 << loc != 0 {   // white piece
+            if loc & !7 == RANK_NUMBER && piece_a & (mask_c << RANK_SHIFT) == 0 {
+                mask_b |= 1u64 << loc << RANK_SHIFT;
+            } else if self.move_count == self.en_passant.valid_turn && mask_b & (1u64 << self.en_passant.place >> 2*RANK_SHIFT) != 0 {
+                mask_c |= 1u64 << self.en_passant.place >> 2*RANK_SHIFT;
             }
-            (piece_a ^ mask_c << 8, mask_b << 8)
+            (piece_a ^ mask_c << RANK_SHIFT, mask_b << RANK_SHIFT)
 
         } else {
-            if loc & !7 == 48 && piece_a & (mask_c >> 16) == 0 {    // black piece
-                mask_b |= 1 << loc >> 8;
-            } else if self.move_count == self.en_passant.valid_turn && mask_b & (1u64 << self.en_passant.place << 16) != 0 {
-                mask_c |= 1u64 << self.en_passant.place << 24;
+            if loc & !7 == 6*RANK_NUMBER && piece_a & (mask_c >> 2*RANK_SHIFT) == 0 {    // black piece
+                mask_b |= 1u64 << loc >> RANK_SHIFT;
+            } else if self.move_count == self.en_passant.valid_turn && mask_b & (1u64 << self.en_passant.place << 2*RANK_SHIFT) != 0 {
+                mask_c |= 1u64 << self.en_passant.place << 3*RANK_SHIFT;
             }
 
-            (piece_a ^ mask_c >> 16, mask_b >> 8)
+            (piece_a ^ mask_c >> 2*RANK_SHIFT, mask_b >> RANK_SHIFT)
         };
 
         // println!("{mask:064b}\n{ret:064b}\n");
@@ -175,19 +186,21 @@ impl GameState {
     //knight
     fn generate_knight_moves(&self, loc: u8) -> Vec<u8> {
         // 可動領域
-        let mut mask_b = if loc & 7 < 4 { 0x3f3f3f3f3f3f3f3f } else { 0xfcfcfcfcfcfcfcfc };
+        // 0x3f3f3f3f3f3f3f3f: 左2列除外
+        // 0xfcfcfcfcfcfcfcfc: 右2列除外
+        let mut mask_b = if loc & 7 < 4 { 0x3f3f3f3f3f3f3f3fu64 } else { 0xfcfcfcfcfcfcfcfcu64 };
 
         // ベース可動範囲を適応
+        // 18: 位置調整の境界値
         mask_b &= if loc < 18 { 0xa1100110a >> (18 - loc) } else { 0xa1100110a << (loc - 18) };
 
         // 全体ボード
-        let ret = if self.white & (1 << loc) != 0 {
+        let ret = if self.white & (1u64 << loc) != 0 {
             !self.white & (self.black | mask_b)
         } else {
             !self.black & (self.white | mask_b)
         };
 
-        println!("knihgt");
         ret_loc(ret & mask_b)
     }
 
@@ -265,8 +278,10 @@ pub fn mvoe_piece(from: u8, to: u8, state: State<Arc<Mutex<GameState>>>) -> u8 {
     maps.mvoe_piece(from, to);
 
     // 削除する駒の位置を返す
-    if maps.pawn & (1u64 << to) != 0 && (maps.en_passant.place as i8 - to as i8).abs() == 8 && maps.move_count - 1 == maps.en_passant.valid_turn {
-        (maps.en_passant.place as i8 + if maps.en_passant.valid_turn & 1 != 0 { 16 } else { -16 }).try_into().unwrap()
+    // 8(/8): RANK NUMBER
+    if maps.pawn & (1u64 << to) != 0 && maps.en_passant.place.abs_diff(to) == 8 && maps.en_passant.valid_turn == (maps.move_count - 1) {
+        let rank_shift = if maps.en_passant.valid_turn & 0b1 != 0 { RANK_UP } else { RANK_DOWN };
+        ((maps.en_passant.place as i8) + 2*rank_shift).try_into().unwrap()
     } else {
         0
     }
