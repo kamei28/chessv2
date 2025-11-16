@@ -4,11 +4,13 @@ use tauri::State;
 
 use crate::{EnPassant, GameState};
 
+/** Constants used for rank */
 const RANK_SHIFT    : u8 =  8;
-const RANK_NUMBER   : u8 =  8;
+const RANK_INDEX   : u8 =  8;
 const RANK_UP       : i8 =  8;
 const RANK_DOWN     : i8 = -8;
-const FILE_SHIFT    : u8 =  1;
+
+/** Constants used for piece move generation */
 const PAWN_CENTER   : u8 =  1;
 const KNIGHT_CENTER : u8 = 18;
 
@@ -140,7 +142,7 @@ impl GameState {
 
             // 白ポーンの処理
             // 2マス飛び可能か判定
-            if loc & !7 == RANK_NUMBER && board & (attack_mask << RANK_SHIFT) == 0 {
+            if loc & !7 == RANK_INDEX && board & (attack_mask << RANK_SHIFT) == 0 {
                 forward_mask |= 1u64 << loc << RANK_SHIFT;
                 
             // アンパッサン可能か判定
@@ -156,7 +158,7 @@ impl GameState {
         } else {
             // 黒ポーンの処理
             // 2マス飛び可能か判定
-            if loc & !7 == 6*RANK_NUMBER && board & (attack_mask >> 2*RANK_SHIFT) == 0 {
+            if loc & !7 == 6*RANK_INDEX && board & (attack_mask >> 2*RANK_SHIFT) == 0 {
                 forward_mask |= 1u64 << loc >> RANK_SHIFT;
 
             // アンパッサン可能か判定
@@ -271,6 +273,7 @@ pub fn get_valid_moves(loc: u8, state: State<Arc<Mutex<GameState>>>) -> Vec<u8> 
 pub fn mvoe_piece(from: u8, to: u8, state: State<Arc<Mutex<GameState>>>) -> Option<i8> {
     let mut maps = state.lock().unwrap();
     
+    // 駒の移動処理
     println!("move from {from} to {to}");
     maps.mvoe_piece(from, to);
 
@@ -281,7 +284,7 @@ pub fn mvoe_piece(from: u8, to: u8, state: State<Arc<Mutex<GameState>>>) -> Opti
     if let Some(turn) = maps.en_passant.valid_turn {
 
         // アンパッサンされたか判定
-        if is_pawn && turn == (maps.move_count - 1) && loc_abs == RANK_NUMBER {
+        if is_pawn && turn == (maps.move_count - 1) && loc_abs == RANK_INDEX {
             let rank_shift = if turn & 0b1 != 0 { RANK_UP } else { RANK_DOWN };
 
             // アンパッサンされた駒の位置を返す
