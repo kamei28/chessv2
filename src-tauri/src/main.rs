@@ -7,11 +7,10 @@ mod rules;
 #[derive(PartialEq, Eq, Debug, Default)]
 struct EnPassant {
     place: u8, 
-    valid_turn: u32
+    valid_turn: Option<u32>
 }
 
 #[derive(Debug, Default)]
-/** ボードの構造体を作成 */
 struct GameState {
     move_count: u32, 
     en_passant: EnPassant, 
@@ -30,7 +29,7 @@ struct GameState {
 impl GameState {
     fn reset(&mut self) {
         self.move_count = 0;
-        self.en_passant = EnPassant { place: 0, valid_turn: 0 };
+        self.en_passant = EnPassant { place: 0, valid_turn: None };
         self.white  = 0xffff;
         self.black  = 0xffff << 0x30;
         self.pawn   = 0xff << 0x30 | 0xff00;
