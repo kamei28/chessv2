@@ -153,29 +153,80 @@ impl GameState {
         // let mut pw_mask = (v1 & (g2 | v2)) | (!v1 & (g4 | v3));
         // pw_mask &= !g5;
         
-
-
         // let v1 = ((self.white >> loc & 1)as u64).wrapping_neg();
-        let v5 = loc & !7;
-        let pw_mask = if self.white >> loc & 1 != 0 {
-            let v2 = loc + 7;
-            let mut v3 = !self.black | self.white;
-            let mut v4 = ((v5 == 8 && (self.white | self.black) & (0b10 << v2) == 0) as u64).wrapping_neg();
-            v4 = (v4 & 0x207) | (!v4 & 0b111);
-            v3 ^= 0b101 << v2;
-            v3 &= v4 << v2;
-            // v3 & 0xff00 << v5
-            v3
-        } else {
-            let v2 = loc - 8;
-            let mut v3 = !self.white | self.black;
-            let mut v4 = ((v5 == 48 && (self.white | self.black) & (0b1 << v2) == 0) as u64).wrapping_neg();
-            v4 = (v4 & 0x702) | (!v4 & 0x700);
-            v3 ^= 0x500 << v2 >> 9;
-            v3 &= v4 << v2 >> 9;
-            // v3 & 0xff << v5 - 8
-            v3
-        };
+        let g1 = (self.black >> loc & 1) as u8;
+        // let g2 = (g1 as u64).wrapping_neg();
+        let g3 = loc & !7;
+        let g4 = g1 << 4;
+
+        let mut pw_mask = 0;
+        let mut v1 = self.white | self.black;
+        v1 ^= 0x100 << loc >> g4;
+        v1 &= 0x100 << loc >> g4;
+
+        println!("::{}", g4);
+        println!("::{:064b}", 1u64 << (loc + 8));
+        println!("::{:064b}", 0x100u64 << loc >> g4);
+        println!("::{:064b}", self.white | self.black);
+        println!("::{:064b}", (0x100u64 << loc >> g4) ^ (self.white | self.black));
+
+        // println!("{:064b}\n{:064b}", self.white | self.black, 0x100 << loc >> g4);
+
+        
+        // println!("{v1}, {}", v1/v1);
+        // v1 ^= 0x1001*(v1/v1) << loc >> g4;
+
+        let mut v2 = if g1 != 0 { self.white } else { self.black };
+        v2 ^= 0x280 << loc >> g4;
+        v2 &= 0x280 << loc >> g4;
+        pw_mask |= v1 | v2;
+        // pw_mask &= 0x10381 << loc >> g4;
+        // println!("{pw_mask:064b}");
+
+
+        // // 前方を確認
+        // let mut pw_mask = self.white | self.black;
+        // let v1 = loc as i8 + if g1 == 0 { 8 } else { -8 };
+        // pw_mask ^= 0x101 << loc >> (g4 >> 1);
+
+        // pw_mask &= 0x10381 << loc >> g4;
+
+
+        // let is_black = (self.black >> loc & 1) as u8;
+        // let mut v1 = 0x100 << loc >> (is_black << 3);
+        // v1 ^= self.white | self.black;
+        // v1 ^= 0x10001*((v1 != 0) as u64) >> (is_black << 4);
+        // let mut pw_mask = if is_black == 0 { self.white } else { self.white };
+        // pw_mask |= v1;
+        // pw_mask &= 0x10381 << loc >> (is_black << 4);
+        // pw_mask |= 0x10381 << loc >> g4;
+        // pw_mask ^= (0b101 << g4 >> g1);
+        // pw_mask &= 0xff00 << g3;
+
+        // // 2マスチェック
+        // let v2 = v1 & (0b10 << g4 >> g1);
+        // pw_mask |= v2 << (2*g4 + 1) >> 2*g1;
+
+        // let v5 = loc & !7;
+        // let pw_mask = if self.white >> loc & 1 != 0 {
+        //     let v2 = loc + 7;
+        //     let mut v3 = !self.black | self.white;
+        //     let mut v4 = ((v5 == 8 && (self.white | self.black) & (0b10 << v2) == 0) as u64).wrapping_neg();
+        //     v4 = (v4 & 0x207) | (!v4 & 0b111);
+        //     v3 ^= 0b101 << v2;
+        //     v3 &= v4 << v2;
+        //     v3 & 0xff00 << v5
+        //     // v3
+        // } else {
+        //     let v2 = loc - 8;
+        //     let mut v3 = !self.white | self.black;
+        //     let mut v4 = ((v5 == 48 && (self.white | self.black) & (0b1 << v2) == 0) as u64).wrapping_neg();
+        //     v4 = (v4 & 0x702) | (!v4 & 0x700);
+        //     v3 ^= 0x500 << v2 >> 9;
+        //     v3 &= v4 << v2 >> 9;
+        //     v3 & 0xff << v5 - 8
+        //     // v3
+        // };
         
         
         // let v2 = 0b111 << loc >> PAWN_CENTER;
