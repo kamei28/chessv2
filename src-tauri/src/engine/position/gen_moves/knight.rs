@@ -4,6 +4,7 @@ use crate::engine::position::consts::*;
 impl GameState {
     #[inline(always)]
     pub fn generate_knight_moves(&self, loc: u8) -> u64 {
+        
         // 可動範囲がはみ出ないように制限
         let v1 = ((loc & 7 < 4) as u64).wrapping_neg();
         let mut knight_moves = (v1 & 0x3f3f3f3f3f3f3f3fu64) | (!v1 & 0xfcfcfcfcfcfcfcfcu64);
