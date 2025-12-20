@@ -66,8 +66,8 @@ pub fn get_valid_moves(loc: u8, state: State<Arc<Mutex<GameState>>>) -> Vec<u8> 
     ret_loc(maps.get_valid_moves(loc))
 }
 
-/** 駒の移動処理(アプリ用) */
 #[tauri::command]
+/** 駒の移動処理(アプリ用) */
 pub fn move_piece(from: u8, to: u8, state: State<Arc<Mutex<GameState>>>) -> Option<i8> {
     let mut maps = state.lock().unwrap();
 
@@ -94,8 +94,8 @@ pub fn move_piece(from: u8, to: u8, state: State<Arc<Mutex<GameState>>>) -> Opti
     }
 }
 
-/** debag */
 #[tauri::command]
+/** debag */
 pub fn test(loc: u8, state: State<Arc<Mutex<GameState>>>) -> u64 {
     let maps = state.lock().unwrap();
     let start = unsafe { _rdtsc() };

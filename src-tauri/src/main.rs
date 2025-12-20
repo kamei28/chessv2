@@ -10,8 +10,8 @@ use std::sync::{Arc, Mutex};
 use crate::engine::position::*;
 
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 /** アプリの起動、ボードデータの共有化 */
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
 fn main() {
     let mut board = GameState::default();
     board.reset();

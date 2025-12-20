@@ -1,10 +1,5 @@
-// pub mod piece_type;
 pub mod consts;
 pub mod game_state;
-
-pub mod move_piece;
-pub mod valid_moves;
-
 pub mod gen_moves {
     pub mod pawn;
     pub mod rook;
