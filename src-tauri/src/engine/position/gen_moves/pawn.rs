@@ -1,13 +1,8 @@
 use crate::engine::position::game_state::GameState;
 
 impl GameState {
-    // legal pawn moves
     #[inline(always)]
     pub fn generate_pawn_moves(&self, loc: u8) -> u64 {
-        // let start_instant = Instant::now();
-        // let start = unsafe { _rdtsc() };
-
-        // for _i in 0..=10000000 {
 
         // ベース定義
         let g1 = (self.black >> loc & 1) as u8;
@@ -18,7 +13,6 @@ impl GameState {
         // 前方確認
         let mut v1 = self.white | self.black;
         let mut v2 = 0x100 << loc >> g4;
-        // v1 ^= v2;
 
         // 2マス
         let v3 = g2 * ((v1 ^ v2) & v2 != 0) as u8;
@@ -31,17 +25,6 @@ impl GameState {
         v2 &= 0x280 << loc >> g4;
 
         // 合法手作成
-        // let pw_mask = (v1 | v2) & !(0xff << g3);
         (v1 | v2) & !(0xff << g3)
-        
-        // }
-
-        // let end = unsafe { _rdtsc() };
-        // println!("{:?}", start_instant.elapsed());
-        // println!("cycles: {}", end - start);
-
-        // ret_loc(ret & mask)
-        // pw_mask
-        // vec![]
     }
 }

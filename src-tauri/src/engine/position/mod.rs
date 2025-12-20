@@ -1,5 +1,6 @@
 pub mod consts;
 pub mod game_state;
+
 pub mod gen_moves {
     pub mod pawn;
     pub mod rook;

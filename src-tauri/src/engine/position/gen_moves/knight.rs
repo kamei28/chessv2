@@ -2,14 +2,8 @@ use crate::engine::position::game_state::GameState;
 use crate::engine::position::consts::*;
 
 impl GameState {
-    // legal knight moves
     #[inline(always)]
     pub fn generate_knight_moves(&self, loc: u8) -> u64 {
-        // let start_instant = Instant::now();
-        // let start = unsafe { _rdtsc() };
-
-        // for _i in 0..=10000000 {
-
         // 可動範囲がはみ出ないように制限
         let v1 = ((loc & 7 < 4) as u64).wrapping_neg();
         let mut knight_moves = (v1 & 0x3f3f3f3f3f3f3f3fu64) | (!v1 & 0xfcfcfcfcfcfcfcfcu64);
@@ -27,16 +21,6 @@ impl GameState {
         let v3 = !self.black & (self.white | knight_moves);
         knight_moves &= (v1 & v2) | (!v1 & v3);
 
-        // black_box(knight_moves);
-
-        // }
-
-        // let end = unsafe { _rdtsc() };
-        // println!("{:?}", start_instant.elapsed());
-        // println!("cycles: {}", end - start);
-
-        // ret_loc(knight_moves)
         knight_moves
-        // vec![]
     }
 }
