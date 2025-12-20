@@ -4,16 +4,52 @@
 use std::sync::{Arc, Mutex};
 mod rules;
 
+/* 駒の初期配置 */
+const START_POSITION: [Piece; 64] = [
+    // 8段目
+    Piece::Rook, Piece::Knight, Piece::Bishop, Piece::Queen,
+    Piece::King, Piece::Bishop, Piece::Knight, Piece::Rook,
+    // 7段目
+    Piece::WPawn, Piece::WPawn, Piece::WPawn, Piece::WPawn,
+    Piece::WPawn, Piece::WPawn, Piece::WPawn, Piece::WPawn,
+    // 6〜3段目
+    Piece::None, Piece::None, Piece::None, Piece::None,
+    Piece::None, Piece::None, Piece::None, Piece::None,
+    Piece::None, Piece::None, Piece::None, Piece::None,
+    Piece::None, Piece::None, Piece::None, Piece::None,
+    Piece::None, Piece::None, Piece::None, Piece::None,
+    Piece::None, Piece::None, Piece::None, Piece::None,
+    Piece::None, Piece::None, Piece::None, Piece::None,
+    Piece::None, Piece::None, Piece::None, Piece::None,
+    // 2段目
+    Piece::BPawn, Piece::BPawn, Piece::BPawn, Piece::BPawn,
+    Piece::BPawn, Piece::BPawn, Piece::BPawn, Piece::BPawn,
+    // 1段目
+    Piece::Rook, Piece::Knight, Piece::Bishop, Piece::Queen,
+    Piece::King, Piece::Bishop, Piece::Knight, Piece::Rook,
+];
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/* 駒の種類を定義 */
+pub enum Piece { WPawn, BPawn, Knight, Bishop, Rook, Queen, King, None }
+
 #[derive(PartialEq, Eq, Debug, Default)]
+/* アンパッサン構造体 */
 struct EnPassant {
     place: u8, 
     valid_turn: Option<u32>
 }
 
+#[derive(Debug, Clone, Copy)]
+/* 判別用ボードの作成 */
+struct PieceType([Piece; 64]);
+
 #[derive(Debug, Default)]
+/* ゲームデータの管理 */
 struct GameState {
     move_count: u32, 
     en_passant: EnPassant, 
+    piecet: PieceType, 
     white:  u64, 
     black:  u64, 
     pawn:   u64, 
@@ -25,11 +61,19 @@ struct GameState {
     error:  u64
 }
 
+/* defaultの手動設定 */
+impl Default for PieceType {
+    fn default() -> Self {
+        PieceType(START_POSITION)
+    }
+}
+
 /** reset: ボードを初期化 */
 impl GameState {
     fn reset(&mut self) {
         self.move_count = 0;
         self.en_passant = EnPassant { place: 0, valid_turn: None };
+        self.piecet = PieceType::default();
         self.white  = 0xffff;
         self.black  = 0xffff << 0x30;
         self.pawn   = 0xff << 0x30 | 0xff00;
@@ -43,7 +87,7 @@ impl GameState {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-/** アプリを起動、ボードを共有 */
+/** アプリの起動、ボードデータの共有化 */
 fn main() {
     let mut board = GameState::default();
     board.reset();

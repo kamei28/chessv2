@@ -15,6 +15,11 @@ const getValidMoves = async (piece, loc) => {
 
   // 移動可能範囲を取得
   lastvalidmoves = await invoke("get_valid_moves", { loc: Number(loc) });
+  // lastvalidmoves = await invoke("test", { loc: Number(loc) });
+
+  // getid("ns").innerText = lastvalidmoves;
+  
+  // return 0;
 
   // 移動可能範囲を表示
   for (v of lastvalidmoves) {
