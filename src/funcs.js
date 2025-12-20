@@ -49,7 +49,7 @@ const movePiece = (fromp, to) => {
 
     // 駒の移動をサーバに反映
     console.log(`${fromp.id} moved from ${fromp.parentElement.id} to ${Number(to.id)}`);
-    invoke("mvoe_piece", {
+    invoke("move_piece", {
       from: Number(fromp.parentElement.id),
       to: Number(to.id),
     }).then(loc => {
