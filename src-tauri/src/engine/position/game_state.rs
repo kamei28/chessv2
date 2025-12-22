@@ -1,17 +1,10 @@
 use crate::engine::position::consts::*;
 
-/** アンパッサン構造体 */
-#[derive(PartialEq, Eq, Debug, Default)]
-pub struct EnPassant {
-    pub place: u8, 
-    pub valid_turn: Option<u32>
-}
-
 /** ゲームデータの管理 */
 #[derive(Debug, Default)]
 pub struct GameState {
     pub move_count: u32, 
-    pub en_passant: EnPassant, 
+    pub en_passant: u8, 
     pub white:  u64, 
     pub black:  u64, 
     pub pawn:   u64, 
@@ -28,7 +21,7 @@ impl GameState {
     /** ゲームデータをリセット */
     pub fn reset(&mut self) {
         self.move_count = 0;
-        self.en_passant = EnPassant { place: 0, valid_turn: None };
+        self.en_passant = 0;
         self.white  = 0xffff;
         self.black  = 0xffff << 0x30;
         self.pawn   = 0xff << 0x30 | 0xff00;
@@ -109,29 +102,20 @@ impl GameState {
 
     /** アンパッサンの判定 */
     pub fn handle_en_passant(&mut self, from: u8, to: u8) {
-        // 移動先のアンパッサン構造体を定義
-        let rank_shift = if self.move_count & 0b1 == 0 {
-            RANK_UP
-        } else {
-            RANK_DOWN
-        };
-        let expected_en_passant = EnPassant {
-            place: ((to as i8) + rank_shift) as u8,
-            valid_turn: Some(self.move_count),
-        };
 
-        // アンパッサンの有効判定
-        if expected_en_passant == self.en_passant {
+        // 有効なら移動して削除
+        if self.en_passant == to {
             self.white &= !(1u64 << to << RANK_SHIFT);
             self.black &= !(1u64 << to >> RANK_SHIFT);
+            self.en_passant = 0;
 
-        // 2マス飛び判定
+        // 2マス飛びなら有効化
         } else if from.abs_diff(to) == 2 * RANK_SHIFT {
-            // アンパッサンに登録
-            self.en_passant = EnPassant {
-                place: from,
-                valid_turn: Some(self.move_count + 1),
-            };
+            self.en_passant = (from + to)/2;
+        
+        // 無効なら削除
+        } else {
+            self.en_passant = 0;
         }
     }
     
@@ -140,12 +124,18 @@ impl GameState {
     pub fn get_valid_moves(&self, loc: u8) -> u64 {
         let bit_mask = 1u64 << loc;
 
-        // wpawn bpawnに分けるかもしれない
-        if self.pawn & bit_mask != 0 { self.generate_pawn_moves(loc) }
+        // ポーンだけ白黒で処理分け
+        if self.pawn & bit_mask != 0 {
+            if self.white & bit_mask != 0 {
+                self.generate_wpawn_moves(loc)
+            } else { 
+                self.generate_bpawn_moves(loc)
+            }
+        }
         else if self.knight & bit_mask  != 0 { self.generate_knight_moves(loc)  }
         else if self.bishop & bit_mask  != 0 { self.generate_bishop_moves(loc)  }
-        else if self.rook   & bit_mask  != 0 { self.generate_rook_moves(loc)    }
         else if self.queen  & bit_mask  != 0 { self.generate_queen_moves(loc)   }
+        else if self.rook   & bit_mask  != 0 { self.generate_rook_moves(loc)    }
         else if self.king   & bit_mask  != 0 { self.generate_king_moves(loc)    }
         else { 0x0 }
     }

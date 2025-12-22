@@ -1,5 +1,5 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+// #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod tauri_cmd;
 mod engine {
@@ -8,7 +8,6 @@ mod engine {
 
 use std::sync::{Arc, Mutex};
 use crate::engine::position::*;
-
 
 /** アプリの起動、ボードデータの共有化 */
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

@@ -2,7 +2,8 @@ pub mod consts;
 pub mod game_state;
 
 pub mod gen_moves {
-    pub mod pawn;
+    pub mod wpawn;
+    pub mod bpawn;
     pub mod rook;
     pub mod knight;
     pub mod bishop;

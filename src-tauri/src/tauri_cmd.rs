@@ -71,27 +71,23 @@ pub fn get_valid_moves(loc: u8, state: State<Arc<Mutex<GameState>>>) -> Vec<u8> 
 pub fn move_piece(from: u8, to: u8, state: State<Arc<Mutex<GameState>>>) -> Option<i8> {
     let mut maps = state.lock().unwrap();
 
+    // アンパッサンを反映
+    let en = if maps.en_passant == to {
+        if maps.white & (1 << from) == 0 {
+            Some(maps.en_passant as i8 + RANK_STEP)
+        } else {
+            Some(maps.en_passant as i8 - RANK_STEP)
+        }
+    } else {
+        None
+    };
+
     // 駒の移動処理
     println!("move from {from} to {to}");
     maps.move_piece(from, to);
 
-    let is_pawn = maps.pawn & (1u64 << to) != 0;
-    let loc_abs = maps.en_passant.place.abs_diff(to);
-
     // 削除する駒の位置を返す
-    if let Some(turn) = maps.en_passant.valid_turn {
-        // アンパッサンされたか判定
-        if is_pawn && turn == (maps.move_count - 1) && loc_abs == RANK_INDEX {
-            let rank_shift = if turn & 0b1 != 0 { RANK_UP } else { RANK_DOWN };
-
-            // アンパッサンされた駒の位置を返す
-            Some((maps.en_passant.place as i8) + 2 * rank_shift)
-        } else {
-            None
-        }
-    } else {
-        None
-    }
+    en
 }
 
 #[tauri::command]
