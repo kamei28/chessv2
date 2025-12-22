@@ -17,7 +17,8 @@ impl GameState {
         // 斜め前
         let g2 = loc & 7;
         let v4 = (((g2 != 7) as u64) << 9) | (((g2 != 0) as u64) << 7);
-        
+
+        // 合成して返却
         v2 | (v4 << loc) & (self.black | v3)
     }
 }

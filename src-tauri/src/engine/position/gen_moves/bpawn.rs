@@ -18,6 +18,7 @@ impl GameState {
         let g2 = loc & 7;
         let v4 = (((g2 != 7) as u64) << 2) | ((g2 != 0) as u64);
 
+        // 合成して返却
         v2 | (v4 << loc >> (RANK_STEP + FILE_STEP)) & (self.white | v3)
     }
 }
